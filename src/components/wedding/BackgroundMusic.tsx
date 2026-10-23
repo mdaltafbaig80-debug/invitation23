@@ -13,37 +13,38 @@ type BackgroundMusicProps = {
  * - Fails silently if no audio file is provided.
  */
 export function BackgroundMusic({
-  src = "/music.mp3",
+  src = "/invitations/song.mpeg",
   autoPlayTrigger = false,
 }: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
 
-  // Check if music file exists
+  // Initialize Audio
   useEffect(() => {
-    if (!src) return;
-
     const audio = new Audio();
     audio.src = src;
     audio.loop = true;
     audio.preload = "auto";
     audioRef.current = audio;
 
-    const handleCanPlay = () => {
-      setIsAvailable(true);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onError = () => {
+      // If .mpeg fails, try .mp3
+      if (audio.src.endsWith(".mpeg")) {
+        audio.src = "/invitations/song.mp3";
+      }
     };
 
-    const handleError = () => {
-      setIsAvailable(false);
-    };
-
-    audio.addEventListener("canplaythrough", handleCanPlay, { once: true });
-    audio.addEventListener("error", handleError, { once: true });
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("error", onError);
 
     return () => {
-      audio.removeEventListener("canplaythrough", handleCanPlay);
-      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("error", onError);
       audio.pause();
       audio.src = "";
     };
@@ -51,17 +52,23 @@ export function BackgroundMusic({
 
   // When user clicks 'Tap to Open', start music
   useEffect(() => {
-    if (autoPlayTrigger && isAvailable && audioRef.current) {
-      audioRef.current
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((err) => {
-          console.log("Audio autoplay prevented or file absent:", err);
-        });
+    if (autoPlayTrigger && audioRef.current) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((err) => {
+            console.warn("Audio play delayed:", err);
+            if (audioRef.current && audioRef.current.src.endsWith(".mpeg")) {
+              audioRef.current.src = "/invitations/song.mp3";
+              audioRef.current.play().catch(() => {});
+            }
+          });
+      }
     }
-  }, [autoPlayTrigger, isAvailable]);
+  }, [autoPlayTrigger]);
 
   const toggleMusic = () => {
     const audio = audioRef.current;

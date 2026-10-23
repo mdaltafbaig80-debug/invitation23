@@ -58,9 +58,14 @@ export function WeddingCoverPage({ onTapOpen, onComplete }: WeddingCoverPageProp
     }
   };
 
+  const [isBlurringOut, setIsBlurringOut] = useState(false);
+
   const handleVideoEnded = () => {
-    setHasEnded(true);
-    onComplete?.(); // Unlocks scrolling on page
+    setIsBlurringOut(true);
+    setTimeout(() => {
+      setHasEnded(true);
+      onComplete?.();
+    }, 1000);
   };
 
   const scrollToNext = (e: React.MouseEvent) => {
@@ -72,7 +77,11 @@ export function WeddingCoverPage({ onTapOpen, onComplete }: WeddingCoverPageProp
   return (
     <section
       id="cover"
-      className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#241710]"
+      className={`relative flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#241710] transition-all duration-1000 ease-out ${
+        isBlurringOut
+          ? "filter blur-2xl opacity-0 scale-105 pointer-events-none"
+          : "filter blur-0 opacity-100 scale-100"
+      }`}
     >
       {/* Full-screen cover container */}
       <div

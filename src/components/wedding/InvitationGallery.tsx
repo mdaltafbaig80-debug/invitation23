@@ -206,8 +206,55 @@ function FullscreenVideoItem({
 }
 
 /**
+ * Full-Screen Foot Image Section:
+ * Displays footimg.jpeg fitted cleanly to mobile/desktop screens.
+ * Features a simple minimalist bouncing scroll animation without a button.
+ */
+function FootImageSection() {
+  const scrollToVideos = () => {
+    document.getElementById("video-first")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <section
+      id="footimg-section"
+      onClick={scrollToVideos}
+      className="relative flex h-[100dvh] w-full cursor-pointer items-center justify-center overflow-hidden bg-[#241710] select-none"
+    >
+      <img
+        src="/invitations/footimg.jpeg"
+        alt="Wedding Invitation of Niharika & Likith"
+        className="h-full w-full max-h-[100dvh] max-w-full object-contain drop-shadow-2xl"
+      />
+
+      {/* Simple Minimalist Scroll Animation */}
+      <div className="absolute inset-x-0 bottom-4 sm:bottom-6 z-30 flex flex-col items-center pointer-events-none">
+        <div className="flex flex-col items-center gap-1 text-wedding-cream drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] animate-bounce">
+          <span className="font-heading text-[11px] sm:text-xs tracking-[0.28em] uppercase text-wedding-gold/90 font-medium">
+            Scroll
+          </span>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5 text-wedding-gold"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path
+              d="M19 9l-7 7-7-7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
  * Sequential Full-Screen Vertical Scroll Gallery:
- * Displays 3-vid.mp4 (Reception) and 4-vid.mp4 (Muhurtham).
+ * Displays footimg.jpeg first, followed by 3-vid.mp4 (Reception) and 4-vid.mp4 (Muhurtham).
  * Each video plays automatically when the guest scrolls to it.
  */
 export function InvitationGallery({ onOpen }: InvitationGalleryProps = {}) {
@@ -216,19 +263,25 @@ export function InvitationGallery({ onOpen }: InvitationGalleryProps = {}) {
 
   return (
     <div id="invitations" className="relative z-10 w-full">
-      {scrollVideos.map((invitation) => {
-        return (
-          <FullscreenVideoItem
-            key={invitation.src}
-            src={invitation.src}
-            poster={invitation.poster}
-            title={invitation.title}
-            alt={invitation.alt}
-            mapUrl={invitation.mapUrl}
-            mapLabel={invitation.mapLabel}
-          />
-        );
-      })}
+      {/* 1. Foot Image Card */}
+      <FootImageSection />
+
+      {/* 2. Invitation Videos: 3-vid (Reception) & 4-vid (Muhurtham) that appear while scrolling */}
+      <div id="video-first">
+        {scrollVideos.map((invitation) => {
+          return (
+            <FullscreenVideoItem
+              key={invitation.src}
+              src={invitation.src}
+              poster={invitation.poster}
+              title={invitation.title}
+              alt={invitation.alt}
+              mapUrl={invitation.mapUrl}
+              mapLabel={invitation.mapLabel}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
